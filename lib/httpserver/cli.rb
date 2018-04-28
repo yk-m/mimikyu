@@ -6,9 +6,9 @@ module Httpserver
     option(:host, :type => :string, :default => "0.0.0.0")
     option(:port, :type => :numeric, :default => 8080)
     desc("listen [host] [port]", "")
-    def listen
+    def echo
       server = Server.new
-      server.listen(options[:host], options[:port])
+      server.echo(options[:host], options[:port])
     end
   end
 end
