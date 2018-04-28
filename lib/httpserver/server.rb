@@ -1,6 +1,5 @@
 require 'httpserver'
 require 'socket'
-require 'time'
 
 module Httpserver
   class Server
@@ -43,18 +42,17 @@ module Httpserver
       }
     end
 
-    def hello_world
-      body = "Hello, world"
+    def helloworld
       listen_multi_thread { |client, address|
-        client.puts "HTTP/1.1 200 OK"
-        client.puts "Server: mimikyu"
-        client.puts "Date: " + Time.now.httpdate
-        client.puts "Content-Type: text/html"
-        client.puts "Content-Length: " + body.length.to_s
-        client.puts "Connection: keep-alive"
-        client.puts ""
-        client.puts body
+        client.puts Response.new.text("Hello, world")
       }
     end
+
+    def http
+      listen_multi_thread { |client, address|
+        client.puts Dispatcher.new.run(client)
+      }
+    end
+
   end
 end

@@ -19,9 +19,16 @@ module Httpserver
 
     option(:host, :type => :string, :default => "0.0.0.0")
     option(:port, :type => :numeric, :default => 8080)
-    desc("hello_world [host] [port]", "up hello world server")
-    def hello_world
-      Server.new(options[:host], options[:port]).hello_world
+    desc("helloworld [host] [port]", "up hello world server")
+    def helloworld
+      Server.new(options[:host], options[:port]).helloworld
+    end
+
+    option(:host, :type => :string, :default => "0.0.0.0")
+    option(:port, :type => :numeric, :default => 8080)
+    desc("http [host] [port]", "up http server")
+    def http
+      Server.new(options[:host], options[:port]).http
     end
   end
 end
