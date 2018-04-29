@@ -49,6 +49,7 @@ module Mimikyu
     end
 
     def http
+      FileCache.instance
       listen_multi_thread { |client, address|
         client.puts Dispatcher.new.run(client)
       }
