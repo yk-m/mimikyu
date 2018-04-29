@@ -30,5 +30,12 @@ module Mimikyu
     def http
       Server.new(options[:host], options[:port]).http
     end
+
+    option(:host, :type => :string, :default => "0.0.0.0")
+    option(:port, :type => :numeric, :default => 8080)
+    desc("cgi [host] [port]", "run cgi")
+    def cgi
+      Server.new(options[:host], options[:port]).cgi
+    end
   end
 end

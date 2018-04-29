@@ -78,6 +78,7 @@ RSpec.describe Mimikyu do
   describe Mimikyu::Response do
     before do
       stub_const("Mimikyu::Response::DOCUMENT_ROOT", File.join(Dir.pwd, "spec/res"))
+      stub_const("Mimikyu::Response::CGI_ROOT", File.join(Dir.pwd, "spec/res"))
     end
 
     let(:status_code) { 200 }
@@ -133,6 +134,22 @@ RSpec.describe Mimikyu do
       status_line, header, body = Mimikyu::Response.new.file(request)
       expect(header).to_not include "Content-Type"
       expect(body).to eq("test.abcd\n")
+    end
+
+    it "Pythonが実行できる" do
+      request = Object.new
+      allow(request).to receive(:uri).and_return("test.py")
+
+      status_line, header, body = Mimikyu::Response.new.cgi(request)
+      expect(header).to eq("\nsys.version_info(major=3, minor=5, micro=3, releaselevel='final', serial=0)\n")
+    end
+
+    it "Rubyが実行できる" do
+      request = Object.new
+      allow(request).to receive(:uri).and_return("test.rb")
+
+      status_line, header, body = Mimikyu::Response.new.cgi(request)
+      expect(header).to eq("\n2.3.3\n")
     end
   end
 end

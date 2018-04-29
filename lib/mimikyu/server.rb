@@ -54,5 +54,10 @@ module Mimikyu
       }
     end
 
+    def cgi
+      listen_multi_thread { |client, address|
+        client.puts Dispatcher.new.cgi(client)
+      }
+    end
   end
 end

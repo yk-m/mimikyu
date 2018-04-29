@@ -42,6 +42,8 @@ module Mimikyu
 
   class Response
     DOCUMENT_ROOT = File.join(Dir.pwd, "www/html")
+    CGI_ROOT = File.join(Dir.pwd, "www/cgi-bin")
+    SH_ROOT = File.join(Dir.pwd, "config/sh")
 
     def self.ext_to_mime(ext)
       return "text/plain" if ext == ".txt"
@@ -54,23 +56,41 @@ module Mimikyu
     end
 
     def file(request)
-      @file_path = File.join(Response::DOCUMENT_ROOT, request.uri)
-      if !File.file?(@file_path)
+      file_path = File.join(Response::DOCUMENT_ROOT, request.uri)
+      if !File.file?(file_path)
         raise HttpError.new(404)
       end
 
       status_line = StatusLine.new.build(200)
       begin
-        file = File.open(@file_path, 'r')
+        file = File.open(file_path, 'r')
         header = Header.new
         header.set_content_length(file.size)
-        header.set_content_type(Response::ext_to_mime(File.extname(@file_path)))
+        header.set_content_type(Response::ext_to_mime(File.extname(file_path)))
         header = header.build
         body = file.read
       ensure
         file.close
       end
       return status_line, header, body
+    end
+
+    def cgi(request)
+      file_path = File.join(Response::CGI_ROOT, request.uri)
+      type = File.extname(file_path).delete(".")
+      sh_path = File.join(Response::SH_ROOT, type + ".sh")
+      if !File.file?(file_path)
+        raise HttpError.new(404)
+      end
+      if !File.file?(sh_path)
+        raise HttpError.new(404)
+      end
+      cmd = "sh " + sh_path + " " + file_path
+      result = `#{cmd}`
+      result_code = `echo $?`.chomp
+      result_code = 200 if result_code == "0"
+      status_line = StatusLine.new.build(result_code)
+      return status_line, result, ""
     end
 
     def text(status_code, body)
