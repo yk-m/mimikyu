@@ -13,6 +13,9 @@ module Httpserver
         status_line, header, body = Response.new.file(request)
       rescue HttpError => e
         status_line, header, body = Response.new.text(e.code, e.message)
+      rescue => e
+        e = HttpError.new(500)
+        status_line, header, body = Response.new.text(e.code, e.message)
       end
 
       return status_line + header if request.method == "HEAD"

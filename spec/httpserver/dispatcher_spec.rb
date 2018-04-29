@@ -63,5 +63,11 @@ RSpec.describe Httpserver do
         expect(response_lines[0]).to eq("HTTP/1.0 405 Method Not Allowed")
       end
     end
+
+    context "例外が投げられたとき" do
+      it "500エラーを返す" do
+        allow_any_instance_of(Httpserver::Request).to receive(:new).and_raise()
+      end
+    end
   end
 end
