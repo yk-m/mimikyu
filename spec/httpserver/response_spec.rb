@@ -4,58 +4,73 @@ RSpec.describe Httpserver do
     allow(Time).to receive_message_chain(:now).and_return(first_time)
   end
 
-  describe Httpserver::Header do
+  describe Httpserver::StatusLine do
     let(:status_code) { 200 }
-    let(:headers) { {} }
-    let(:body_length) { "0" }
-    let(:header) { Httpserver::Header.new(status_code, headers, body_length.to_s) }
+    let(:status_line) { Httpserver::StatusLine.new.build(status_code) }
 
-    it "ヘッダーが生成できる" do
-      header_lines = header.to_str.split("\n")
-      expect(header_lines[0]).to eq("HTTP/1.0 200 OK")
-      expect(header_lines[1]).to eq("Server: mimikyu")
-      expect(header_lines[2]).to eq("Date: Thu, 01 Jan 1970 00:00:00 GMT")
-      expect(header_lines[3]).to eq("Connection: close")
-      expect(header_lines[4]).to eq("Content-Length: 0")
+    context "ステータスコードが200のとき" do
+      let(:status_code) { 200 }
+      it "Reason-PhraseがOKになる" do
+        expect(status_line).to eq("HTTP/1.0 200 OK\n")
+      end
     end
 
     context "ステータスコードが400のとき" do
       let(:status_code) { 400 }
       it "Reason-PhraseがBad Requestになる" do
-        header_lines = header.to_str.split("\n")
-        expect(header_lines[0]).to eq("HTTP/1.0 400 Bad Request")
+        expect(status_line).to eq("HTTP/1.0 400 Bad Request\n")
       end
     end
 
-    context "Reason-Phraseがステータスコードが404のとき" do
+    context "ステータスコードが404のとき" do
       let(:status_code) { 404 }
-      it "Not Foundになる" do
-        header_lines = header.to_str.split("\n")
-        expect(header_lines[0]).to eq("HTTP/1.0 404 Not Found")
+      it "Reason-PhraseがNot Foundになる" do
+        expect(status_line).to eq("HTTP/1.0 404 Not Found\n")
       end
     end
 
     context "ステータスコードが500のとき" do
       let(:status_code) { 500 }
       it "Reason-PhraseがInternal Server Errorになる" do
-        header_lines = header.to_str.split("\n")
-        expect(header_lines[0]).to eq("HTTP/1.0 500 Internal Server Error")
+        expect(status_line).to eq("HTTP/1.0 500 Internal Server Error\n")
       end
+    end
+  end
+
+  describe Httpserver::Header do
+    let(:status_code) { 200 }
+    let(:body_length) { "0" }
+    let(:header) { Httpserver::Header.new.build }
+
+    it "ヘッダーが生成できる" do
+      header_lines = header.split("\n")
+      expect(header_lines[0]).to eq("Server: mimikyu")
+      expect(header_lines[1]).to eq("Date: Thu, 01 Jan 1970 00:00:00 GMT")
+      expect(header_lines[2]).to eq("Connection: close")
+      expect(header_lines[3]).to eq("Content-Length: 0")
     end
 
     context "Context-typeを追加したとき" do
-      let(:headers) { {"Content-Type" => "text/html"} }
+      let(:header) { 
+        h = Httpserver::Header.new
+        h.set_content_type("text/html")
+        h.build
+      }
       it "Context-typeがヘッダーに含まれる" do
-        header_lines = header.to_str.split("\n")
-        expect(header_lines[5]).to eq("Content-Type: text/html")
+        header_lines = header.split("\n")
+        expect(header_lines[4]).to eq("Content-Type: text/html")
       end
     end
 
     context "Serverを上書きしたとき" do
-      let(:headers) { {"Server" => "finfin"} }
+      let(:header) { 
+        h = Httpserver::Header.new
+        h.set("Server", "finfin")
+        h.build
+      }
       it "Serverが指定した値に上書きされる" do
-        header_lines = header.to_str.split("\n")
-        expect(header_lines[1]).to eq("Server: finfin")
+        header_lines = header.split("\n")
+        expect(header_lines[0]).to eq("Server: finfin")
       end
     end
   end
@@ -69,64 +84,55 @@ RSpec.describe Httpserver do
     let(:text) { "test" }
 
     it "文字列からレスポンスを生成できる" do
-      lines = Httpserver::Response.new.text(status_code, text).split("\n")
-      expect(lines[4]).to eq("Content-Length: " + text.length.to_s)
-      expect(lines[5]).to eq("Content-Type: text/html")
-      expect(lines[6]).to eq("")
-      expect(lines[7]).to eq("test")
+      status_line, header, body = Httpserver::Response.new.text(status_code, text)
+      header = header.split("\n")
+      expect(header[3]).to eq("Content-Length: " + text.length.to_s)
+      expect(header[4]).to eq("Content-Type: text/html")
+      expect(body).to eq(text)
     end
 
     it "htmlファイルからレスポンスを生成できる" do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.html")
-
-      lines = Httpserver::Response.new.build(request).split("\n")
-      expect(lines[5]).to eq("Content-Type: text/html")
-      expect(lines[6]).to eq("")
-      expect(lines[7]).to eq("test.html")
+      status_line, header, body = Httpserver::Response.new.file(request)
+      header = header.split("\n")
+      expect(header[4]).to eq("Content-Type: text/html")
+      expect(body).to eq("test.html\n")
     end
 
     it "cssファイルからレスポンスを生成できる" do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.css")
 
-      lines = Httpserver::Response.new.build(request).split("\n")
-      expect(lines[5]).to eq("Content-Type: text/css")
-      expect(lines[6]).to eq("")
-      expect(lines[7]).to eq("test.css")
+      status_line, header, body = Httpserver::Response.new.file(request)
+      header = header.split("\n")
+      expect(header[4]).to eq("Content-Type: text/css")
+      expect(body).to eq("test.css\n")
     end
 
     it "jpegファイルからレスポンスを生成できる" do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.jpeg")
 
-      lines = Httpserver::Response.new.build(request).split("\n")
-      expect(lines[5]).to eq("Content-Type: image/jpeg")
-      expect(lines[6]).to eq("")
-      expect(lines[7]).to eq("test.jpeg")
+      status_line, header, body = Httpserver::Response.new.file(request)
+      header = header.split("\n")
+      expect(header[4]).to eq("Content-Type: image/jpeg")
+      expect(body).to eq("test.jpeg\n")
     end
 
     it "ファイルが存在しないときHttpErrorをraiseする" do
       request = Object.new
       allow(request).to receive(:uri).and_return("notfound.test")
-      expect{ Httpserver::Response.new.build(request) }.to raise_error(Httpserver::HttpError)
+      expect{ Httpserver::Response.new.file(request) }.to raise_error(Httpserver::HttpError)
     end
 
     it "特殊な拡張子のときContent-Typeヘッダーを挿入しない" do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.abcd")
 
-      lines = Httpserver::Response.new.build(request).split("\n")
-      expect(lines[5]).to eq("")
-      expect(lines[6]).to eq("test.abcd")
-    end
-
-    it "エラーオブジェクトからレスポンスを生成できる" do
-      lines = Httpserver::Response.new.error(Httpserver::HttpError.new(500)).split("\n")
-      expect(lines[0]).to eq("HTTP/1.0 500 Internal Server Error")
-      expect(lines[5]).to eq("Content-Type: text/html")
-      expect(lines[6]).to eq("")
-      expect(lines[7]).to eq("Internal Server Error")
+      status_line, header, body = Httpserver::Response.new.file(request)
+      expect(header).to_not include "Content-Type"
+      expect(body).to eq("test.abcd\n")
     end
   end
 end

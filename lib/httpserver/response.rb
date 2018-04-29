@@ -2,27 +2,41 @@ require 'httpserver'
 require 'time'
 
 module Httpserver
+  class StatusLine
+    def build(response_code)
+      "HTTP/1.0 " + response_code.to_s + " " + Status[response_code] + "\n"
+    end
+  end
+
   class Header
-    def initialize(response_code, headers, body_length)
-      @response_code = response_code
+    def initialize()
       @headers = {
         "Server" => "mimikyu",
         "Date" => Time.now.httpdate,
         "Connection" => "close",
-        "Content-Length" => body_length
-      }.merge(headers)
+        "Content-Length" => "0"
+      }
     end
 
-    def to_str
-      response = ""
-      response << "HTTP/1.0 " + @response_code.to_s + " " + Status[@response_code] + "\n"
-      response << @headers.reduce("") { |header, (key, value)|
+    def set(name, value)
+      @headers[name] = value
+    end
+
+    def set_content_length(length)
+      set("Content-Length", length)
+    end
+
+    def set_content_type(type)
+      set("Content-Type", type)
+    end
+
+    def build()
+      @headers.reduce("") { |header, (key, value)|
         if value.to_s == "" then
           next header
         end
         header << key.to_s + ": " + value.to_s + "\n"
       }
-      response << "\n"
     end
   end
 
@@ -39,27 +53,33 @@ module Httpserver
       return "image/png" if ext == ".png"
     end
 
-    def text(status_code, body)
-      response = ""
-      response << Header.new(status_code, {"Content-Type" => "text/html"}, body.length).to_str
-      response << body
-    end
-
-    def build(request)
-      path = File.join(Response::DOCUMENT_ROOT, request.uri)
-      if (!File.file?(path)) then
+    def file(request)
+      @file_path = File.join(Response::DOCUMENT_ROOT, request.uri)
+      if !File.file?(@file_path)
         raise HttpError.new(404)
       end
 
-      file = File.open(path, 'r')
-      content_type = Response::ext_to_mime(File.extname(path))
-      response = ""
-      response << Header.new(200, {"Content-Type" => content_type}, file.size).to_str
-      response << file.read
+      status_line = StatusLine.new.build(200)
+      begin
+        file = File.open(@file_path, 'r')
+        header = Header.new
+        header.set_content_length(file.size)
+        header.set_content_type(Response::ext_to_mime(File.extname(@file_path)))
+        header = header.build
+        body = file.read
+      ensure
+        file.close
+      end
+      return status_line, header, body
     end
 
-    def error(e)
-      text(e.code, e.message)
+    def text(status_code, body)
+      status_line = StatusLine.new.build(status_code)
+      header = Header.new
+      header.set_content_length(body.length)
+      header.set_content_type("text/html")
+      header = header.build
+      return status_line, header, body
     end
   end
 end

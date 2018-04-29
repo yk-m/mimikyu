@@ -4,13 +4,16 @@ require 'time'
 module Httpserver
   class Dispatcher
     def run(client)
-      response = Response.new
       begin
         request = Request.new(client)
-        return response.build(request)
+        status_line, header, body = Response.new.file(request)
       rescue HttpError => e
-        return response.error(e)
+        status_line, header, body = Response.new.text(e.code, e.message)
+        p e
       end
+
+      return status_line + header + "\n" + body if request.method == "GET"
+      return status_line + header if request.method == "HEAD"
     end
   end
 end
