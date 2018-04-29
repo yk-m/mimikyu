@@ -1,3 +1,3 @@
-module Httpserver
+module Mimikyu
   VERSION = "0.1.0"
 end

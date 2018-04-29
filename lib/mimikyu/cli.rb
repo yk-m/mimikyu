@@ -1,7 +1,7 @@
-require 'httpserver'
+require 'mimikyu'
 require 'thor'
 
-module Httpserver
+module Mimikyu
   class CLI < Thor
     option(:host, :type => :string, :default => "0.0.0.0")
     option(:port, :type => :numeric, :default => 8080)

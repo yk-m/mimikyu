@@ -1,7 +1,7 @@
-require 'httpserver'
+require 'mimikyu'
 require 'time'
 
-module Httpserver
+module Mimikyu
   class StatusLine
     def build(response_code)
       "HTTP/1.0 " + response_code.to_s + " " + Status[response_code] + "\n"
@@ -54,7 +54,6 @@ module Httpserver
     end
 
     def file(request)
-      p Response::DOCUMENT_ROOT
       @file_path = File.join(Response::DOCUMENT_ROOT, request.uri)
       if !File.file?(@file_path)
         raise HttpError.new(404)

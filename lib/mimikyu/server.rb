@@ -1,7 +1,7 @@
-require 'httpserver'
+require 'mimikyu'
 require 'socket'
 
-module Httpserver
+module Mimikyu
   class Server
     def initialize(host, port)
       @host = host

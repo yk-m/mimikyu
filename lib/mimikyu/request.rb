@@ -1,6 +1,6 @@
-require 'httpserver'
+require 'mimikyu'
 
-module Httpserver
+module Mimikyu
   class Request
     attr_reader :method, :uri, :http_version
     def initialize(client)

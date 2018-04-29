@@ -1,6 +1,6 @@
-require 'httpserver'
+require 'mimikyu'
 
-module Httpserver
+module Mimikyu
   Status = {
     200 => "OK",
     400 => "Bad Request",

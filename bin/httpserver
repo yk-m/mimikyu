@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'httpserver'
+require 'mimikyu'
 
-Httpserver::CLI.start
+Mimikyu::CLI.start

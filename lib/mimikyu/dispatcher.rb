@@ -1,7 +1,7 @@
-require 'httpserver'
+require 'mimikyu'
 require 'time'
 
-module Httpserver
+module Mimikyu
   class Dispatcher
     Allowed_Methods = ["HEAD", "GET"]
     def run(client)

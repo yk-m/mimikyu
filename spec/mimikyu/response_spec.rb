@@ -1,12 +1,12 @@
-RSpec.describe Httpserver do
+RSpec.describe Mimikyu do
   before do
     first_time = Time.at(0)
     allow(Time).to receive_message_chain(:now).and_return(first_time)
   end
 
-  describe Httpserver::StatusLine do
+  describe Mimikyu::StatusLine do
     let(:status_code) { 200 }
-    let(:status_line) { Httpserver::StatusLine.new.build(status_code) }
+    let(:status_line) { Mimikyu::StatusLine.new.build(status_code) }
 
     context "ステータスコードが200のとき" do
       let(:status_code) { 200 }
@@ -37,10 +37,10 @@ RSpec.describe Httpserver do
     end
   end
 
-  describe Httpserver::Header do
+  describe Mimikyu::Header do
     let(:status_code) { 200 }
     let(:body_length) { "0" }
-    let(:header) { Httpserver::Header.new.build }
+    let(:header) { Mimikyu::Header.new.build }
 
     it "ヘッダーが生成できる" do
       header_lines = header.split("\n")
@@ -52,7 +52,7 @@ RSpec.describe Httpserver do
 
     context "Context-typeを追加したとき" do
       let(:header) {
-        h = Httpserver::Header.new
+        h = Mimikyu::Header.new
         h.set_content_type("text/html")
         h.build
       }
@@ -64,7 +64,7 @@ RSpec.describe Httpserver do
 
     context "Serverを上書きしたとき" do
       let(:header) {
-        h = Httpserver::Header.new
+        h = Mimikyu::Header.new
         h.set("Server", "finfin")
         h.build
       }
@@ -75,16 +75,16 @@ RSpec.describe Httpserver do
     end
   end
 
-  describe Httpserver::Response do
+  describe Mimikyu::Response do
     before do
-      stub_const("Httpserver::Response::DOCUMENT_ROOT", File.join(Dir.pwd, "spec/res"))
+      stub_const("Mimikyu::Response::DOCUMENT_ROOT", File.join(Dir.pwd, "spec/res"))
     end
 
     let(:status_code) { 200 }
     let(:text) { "test" }
 
     it "文字列からレスポンスを生成できる" do
-      status_line, header, body = Httpserver::Response.new.text(status_code, text)
+      status_line, header, body = Mimikyu::Response.new.text(status_code, text)
       header = header.split("\n")
       expect(header[3]).to eq("Content-Length: " + text.length.to_s)
       expect(header[4]).to eq("Content-Type: text/html")
@@ -94,7 +94,7 @@ RSpec.describe Httpserver do
     it "htmlファイルからレスポンスを生成できる" do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.html")
-      status_line, header, body = Httpserver::Response.new.file(request)
+      status_line, header, body = Mimikyu::Response.new.file(request)
       header = header.split("\n")
       expect(header[4]).to eq("Content-Type: text/html")
       expect(body).to eq("test.html\n")
@@ -104,7 +104,7 @@ RSpec.describe Httpserver do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.css")
 
-      status_line, header, body = Httpserver::Response.new.file(request)
+      status_line, header, body = Mimikyu::Response.new.file(request)
       header = header.split("\n")
       expect(header[4]).to eq("Content-Type: text/css")
       expect(body).to eq("test.css\n")
@@ -114,7 +114,7 @@ RSpec.describe Httpserver do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.jpeg")
 
-      status_line, header, body = Httpserver::Response.new.file(request)
+      status_line, header, body = Mimikyu::Response.new.file(request)
       header = header.split("\n")
       expect(header[4]).to eq("Content-Type: image/jpeg")
       expect(body).to eq("test.jpeg\n")
@@ -123,14 +123,14 @@ RSpec.describe Httpserver do
     it "ファイルが存在しないときHttpErrorをraiseする" do
       request = Object.new
       allow(request).to receive(:uri).and_return("notfound.test")
-      expect{ Httpserver::Response.new.file(request) }.to raise_error(Httpserver::HttpError)
+      expect{ Mimikyu::Response.new.file(request) }.to raise_error(Mimikyu::HttpError)
     end
 
     it "特殊な拡張子のときContent-Typeヘッダーを挿入しない" do
       request = Object.new
       allow(request).to receive(:uri).and_return("test.abcd")
 
-      status_line, header, body = Httpserver::Response.new.file(request)
+      status_line, header, body = Mimikyu::Response.new.file(request)
       expect(header).to_not include "Content-Type"
       expect(body).to eq("test.abcd\n")
     end

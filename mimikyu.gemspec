@@ -1,11 +1,11 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "httpserver/version"
+require "mimikyu/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "httpserver"
-  spec.version       = Httpserver::VERSION
+  spec.name          = "mimikyu"
+  spec.version       = Mimikyu::VERSION
   spec.authors       = ["Yuka Matsuo"]
   spec.email         = ["matsuo.yk@gmail.com"]
 
