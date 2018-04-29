@@ -5,7 +5,7 @@ html_body = """
 <!DOCTYPE html>
 <html>
 <head>
-<title>受信したデータを表示</title>
+<title>time</title>
 <style>
 h1 {
 font-size: 3em;
