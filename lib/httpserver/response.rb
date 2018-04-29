@@ -41,7 +41,7 @@ module Httpserver
   end
 
   class Response
-    DOCUMENT_ROOT = "/Users/yuka/GoogleDrive/Study/httpserver/www/html"
+    DOCUMENT_ROOT = File.join(Dir.pwd, "www/html")
 
     def self.ext_to_mime(ext)
       return "text/plain" if ext == ".txt"
@@ -54,6 +54,7 @@ module Httpserver
     end
 
     def file(request)
+      p Response::DOCUMENT_ROOT
       @file_path = File.join(Response::DOCUMENT_ROOT, request.uri)
       if !File.file?(@file_path)
         raise HttpError.new(404)

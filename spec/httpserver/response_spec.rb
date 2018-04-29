@@ -77,7 +77,7 @@ RSpec.describe Httpserver do
 
   describe Httpserver::Response do
     before do
-      stub_const("Httpserver::Response::DOCUMENT_ROOT", "/Users/yuka/GoogleDrive/Study/httpserver/spec/res")
+      stub_const("Httpserver::Response::DOCUMENT_ROOT", File.join(Dir.pwd, "spec/res"))
     end
 
     let(:status_code) { 200 }
