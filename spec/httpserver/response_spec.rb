@@ -51,7 +51,7 @@ RSpec.describe Httpserver do
     end
 
     context "Context-typeを追加したとき" do
-      let(:header) { 
+      let(:header) {
         h = Httpserver::Header.new
         h.set_content_type("text/html")
         h.build
@@ -63,7 +63,7 @@ RSpec.describe Httpserver do
     end
 
     context "Serverを上書きしたとき" do
-      let(:header) { 
+      let(:header) {
         h = Httpserver::Header.new
         h.set("Server", "finfin")
         h.build
