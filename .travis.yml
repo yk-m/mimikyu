@@ -5,4 +5,5 @@ rvm:
 python:
   - 3.5.3
 before_install:
+  - pyenv install 3.5.3
   - gem install bundler -v 1.16.1
