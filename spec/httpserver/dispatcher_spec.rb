@@ -4,8 +4,6 @@ RSpec.describe Httpserver do
     allow(Time).to receive_message_chain(:now).and_return(first_time)
   end
 
-  let(:response_lines) { Httpserver::Dispatcher.new.run(Object.new).split("\n") }
-
   describe Httpserver::Dispatcher do
     let(:request_line) { method + " /test.html HTTP/1.0" }
 
@@ -14,6 +12,7 @@ RSpec.describe Httpserver do
       it "正しいHTTP Responseを返せる" do
         allow_any_instance_of(Object).to receive(:gets).and_return(request_line)
         allow_any_instance_of(Httpserver::Response).to receive(:file).and_return(["status\n", "header\n", "body"])
+        response_lines = Httpserver::Dispatcher.new.run(Object.new).split("\n")
         expect(response_lines[0]).to eq("status")
         expect(response_lines[1]).to eq("header")
         expect(response_lines[2]).to eq("")
@@ -23,6 +22,7 @@ RSpec.describe Httpserver do
       it "HTTPErrorがraiseされたときエラーが返却される" do
         allow_any_instance_of(Object).to receive(:gets).and_return(request_line)
         allow_any_instance_of(Httpserver::Response).to receive(:file).and_raise(Httpserver::HttpError, 500)
+        response_lines = Httpserver::Dispatcher.new.run(Object.new).split("\n")
         text = "Internal Server Error"
         expect(response_lines[0]).to eq("HTTP/1.0 500 Internal Server Error")
         expect(response_lines[1]).to eq("Server: mimikyu")
@@ -40,6 +40,7 @@ RSpec.describe Httpserver do
       it "正しいHTTP Responseを返せる" do
         allow_any_instance_of(Object).to receive(:gets).and_return(request_line)
         allow_any_instance_of(Httpserver::Response).to receive(:file).and_return(["status\n", "header\n", "body"])
+        response_lines = Httpserver::Dispatcher.new.run(Object.new).split("\n")
         expect(response_lines[0]).to eq("status")
         expect(response_lines[1]).to eq("header")
         expect(response_lines[2]).to be nil
@@ -49,7 +50,17 @@ RSpec.describe Httpserver do
       it "HTTPErrorがraiseされたときエラーが返却される" do
         allow_any_instance_of(Object).to receive(:gets).and_return(request_line)
         allow_any_instance_of(Httpserver::Response).to receive(:file).and_raise(Httpserver::HttpError, 500)
+        response_lines = Httpserver::Dispatcher.new.run(Object.new).split("\n")
         expect(response_lines[6]).to be nil
+      end
+    end
+
+    context "メソッドがPOSTのとき" do
+      let(:method) { "POST" }
+      it "405エラーを返す" do
+        allow_any_instance_of(Object).to receive(:gets).and_return(request_line)
+        response_lines = Httpserver::Dispatcher.new.run(Object.new).split("\n")
+        expect(response_lines[0]).to eq("HTTP/1.0 405 Method Not Allowed")
       end
     end
   end
