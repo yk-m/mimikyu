@@ -57,16 +57,16 @@ module Mimikyu
 
     def file(request)
       file_path = File.join(Response::DOCUMENT_ROOT, request.uri)
-      if !FileCache.instance.has_key?(file_path)
+      if !FileCache.instance.files.has_key?(file_path)
         raise HttpError.new(404)
       end
 
       status_line = StatusLine.new.build(200)
       header = Header.new
-      header.set_content_length(FileCache.instance[file_path].size)
+      header.set_content_length(FileCache.instance.files[file_path].size)
       header.set_content_type(Response::ext_to_mime(File.extname(file_path)))
       header = header.build
-      body = FileCache.instance[file_path]
+      body = FileCache.instance.files[file_path]
       return status_line, header, body
     end
 

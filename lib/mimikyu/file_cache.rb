@@ -3,6 +3,7 @@ require 'singleton'
 
 module Mimikyu
   class FileCache
+    attr_reader :files
     include Singleton
     def initialize()
       @files = {}
@@ -11,14 +12,6 @@ module Mimikyu
         @files[item] = file.read
         file.close
       end
-    end
-
-    def [](key)
-      @files[key]
-    end
-
-    def has_key?(key)
-      @files.has_key?(key)
     end
   end
 end
