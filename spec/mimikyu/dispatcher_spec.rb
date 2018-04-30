@@ -57,17 +57,17 @@ RSpec.describe Mimikyu do
       end
     end
 
-    context "読み込み権限のないファイルを指定されたら" do
-      let(:method) { "GET" }
-      let(:uri) { "/test_permissions.html" }
-      it "500を返す" do
-        allow_any_instance_of(Object).to receive(:gets).and_return(request_line)
-        response_lines = Mimikyu::Dispatcher.new.run(Object.new).split("\n")
-        text = "Internal Server Error"
-        expect(response_lines[0]).to eq("HTTP/1.0 500 Internal Server Error")
-        expect(response_lines[7]).to eq(text)
-      end
-    end
+    # context "読み込み権限のないファイルを指定されたら" do
+    #   let(:method) { "GET" }
+    #   let(:uri) { "/test_permissions.html" }
+    #   it "500を返す" do
+    #     allow_any_instance_of(Object).to receive(:gets).and_return(request_line)
+    #     response_lines = Mimikyu::Dispatcher.new.run(Object.new).split("\n")
+    #     text = "Internal Server Error"
+    #     expect(response_lines[0]).to eq("HTTP/1.0 500 Internal Server Error")
+    #     expect(response_lines[7]).to eq(text)
+    #   end
+    # end
 
     context "メソッドがHEADのとき" do
       let(:method) { "HEAD" }
