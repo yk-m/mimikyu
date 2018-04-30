@@ -5,7 +5,7 @@ HTTP Server
 ## Usage
 
 ```
-bundle exec bin/mimikyu
+$ bundle exec bin/mimikyu
 Commands:
   mimikyu cgi [host] [port]                # run cgi
   mimikyu echo [host] [port]               # up echo server
