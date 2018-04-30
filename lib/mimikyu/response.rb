@@ -57,10 +57,6 @@ module Mimikyu
 
     def file(request)
       file_path = File.join(Response::DOCUMENT_ROOT, request.uri)
-      if !File.file?(file_path)
-        raise HttpError.new(404)
-      end
-
       status_line = StatusLine.new.build(200)
       begin
         file = File.open(file_path, 'r')
@@ -69,8 +65,10 @@ module Mimikyu
         header.set_content_type(Response::ext_to_mime(File.extname(file_path)))
         header = header.build
         body = file.read
+      rescue Errno::ENOENT => e
+        raise HttpError.new(404)
       ensure
-        file.close
+        file.close if !file.nil?
       end
       return status_line, header, body
     end
