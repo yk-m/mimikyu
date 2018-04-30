@@ -3,25 +3,17 @@
 HTTP Server
 
 ## Usage
-* echoサーバーを起動する:
 
-        $ bundle exec bin/mimikyu echo --host 0.0.0.0 --port 8080
-
-* echoサーバー（マルチスレッド）を起動する:
-
-        $ bundle exec bin/mimikyu echo_multi_thread --host 0.0.0.0 --port 8080
-
-* HTTPサーバーを起動する
-
-        $ bundle exec bin/mimikyu http --host 0.0.0.0 --port 8080
-
-* CGIサーバー（????）を起動する
-
-        $ bundle exec bin/mimikyu cgi --host 0.0.0.0 --port 8080
-
-* help
-
-        $ bundle exec bin/mimikyu help
+```
+bundle exec bin/mimikyu
+Commands:
+  mimikyu cgi [host] [port]                # run cgi
+  mimikyu echo [host] [port]               # up echo server
+  mimikyu echo_multi_thread [host] [port]  # up multi thread echo server
+  mimikyu helloworld [host] [port]         # up hello world server
+  mimikyu help [COMMAND]                   # Describe available commands or one specific command
+  mimikyu http [host] [port]               # up http server
+```
 
 ## Install
 
